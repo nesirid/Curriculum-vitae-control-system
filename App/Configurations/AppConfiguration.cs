@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 using Repository.Data;
 using Serilog;
 using Service;
+using System.Text.Json.Serialization;
 
 namespace App.Configurations
 {
@@ -29,8 +30,14 @@ namespace App.Configurations
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Connecting controllers and Swagger
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                            .AddJsonOptions(options =>
+                            {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                            });
+
             builder.Services.AddEndpointsApiExplorer();
+
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "File Format Control", Version = "v1" });

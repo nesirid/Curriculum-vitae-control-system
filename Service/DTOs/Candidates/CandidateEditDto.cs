@@ -1,0 +1,28 @@
+﻿using Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+namespace Service.DTOs.Candidates
+{
+    public class CandidateEditDto
+    {
+        public string? FullName { get; set; }
+        public string? Description { get; set; }
+        public DateTime? Birthday { get; set; }
+        public string? BirthPlace { get; set; }
+
+        public GenderType? Gender { get; set; }
+        public DriverLicenseType? DriverLicense { get; set; }
+
+        public string? MaritalStatus { get; set; }
+        public string? Education { get; set; }
+        public List<string>? Skills { get; set; }
+        public List<string>? Languages { get; set; }
+        public List<string>? Certificates { get; set; }
+        public List<string>? PhoneNumbers { get; set; }
+    }
+}

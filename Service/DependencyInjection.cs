@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Service.Services;
+using Service.Services.Interfaces;
 
 
 namespace Service
@@ -10,6 +12,10 @@ namespace Service
             // Automatic mapping profiling
             //services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
+            // Registering file parsers
+
+            // Basic services
+            services.AddScoped<ICandidateService, CandidateService>();
 
             // Registration of validators (if any)
             //services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);

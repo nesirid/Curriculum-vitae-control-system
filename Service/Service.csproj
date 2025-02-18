@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTOs\" />
     <Folder Include="Parsers\Interfaces\" />
     <Folder Include="Services\Interfaces\" />
   </ItemGroup>

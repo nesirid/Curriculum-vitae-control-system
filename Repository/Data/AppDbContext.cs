@@ -9,6 +9,7 @@ namespace Repository.Data
 
         public DbSet<Candidate> Candidates { get; set; }
         public DbSet<Company> Companies { get; set; }
+        public DbSet<PhoneNumber> PhoneNumbers { get; set; }
         public DbSet<CandidateCompany> CandidateCompanies { get; set; }
         public DbSet<Position> Positions { get; set; }
         public DbSet<Experience> Experiences { get; set; }
@@ -24,9 +25,15 @@ namespace Repository.Data
             .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<CandidateCompany>()
-            .HasMany(cc => cc.Positions)
-            .WithOne(p => p.CandidateCompany)
-            .HasForeignKey(p => p.CandidateCompanyId)
+            .HasOne(cc => cc.Candidate)
+            .WithMany(c => c.CandidateCompanies)
+            .HasForeignKey(cc => cc.CandidateId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CandidateCompany>()
+            .HasOne(cc => cc.Company)
+            .WithMany()
+            .HasForeignKey(cc => cc.CompanyId)
             .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Experience>()
@@ -39,6 +46,12 @@ namespace Repository.Data
             .HasOne(p => p.Candidate)
             .WithMany(c => c.PhoneNumbers)
             .HasForeignKey(p => p.CandidateId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Position>()
+            .HasOne(p => p.CandidateCompany)
+            .WithMany(cc => cc.Positions)
+            .HasForeignKey(p => p.CandidateCompanyId)
             .OnDelete(DeleteBehavior.Cascade);
         }
     }
