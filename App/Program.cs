@@ -6,7 +6,6 @@ using Microsoft.OpenApi.Models;
 using Service;
 using App.Configurations;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Logging configuration
