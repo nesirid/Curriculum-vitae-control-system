@@ -17,7 +17,8 @@ namespace App.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateCandidate([FromForm] CandidateCreateDto dto)
         {
-            if (dto == null) return BadRequest("Etibarsız namizəd məlumatları");
+            if (dto == null)
+            return BadRequest("Etibarsız namizəd məlumatları");
 
             var createdCandidate = await _candidateService.CreateCandidateAsync(dto);
             return CreatedAtAction(nameof(GetCandidateById), new { id = createdCandidate.Id }, createdCandidate);
@@ -26,16 +27,17 @@ namespace App.Controllers
         [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateCandidate(int id, [FromForm] CandidateEditDto dto)
         {
-            if (dto == null) return BadRequest("Invalid candidate data");
+            if (dto == null)
+            return BadRequest("Etibarsız namizəd məlumatları");
 
             var updatedCandidate = await _candidateService.UpdateCandidateAsync(id, dto);
             return Ok(updatedCandidate);
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllCandidates()
+        public async Task<IActionResult> GetAllCandidates([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var candidates = await _candidateService.GetAllCandidatesAsync();
+            var candidates = await _candidateService.GetAllCandidatesAsync(pageNumber, pageSize);
             return Ok(candidates);
         }
 

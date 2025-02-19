@@ -1,5 +1,6 @@
 ﻿using App.Middlewares;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using Repository.Data;
 using Serilog;
@@ -22,6 +23,7 @@ namespace App.Configurations
 
         public static void ConfigureServices(WebApplicationBuilder builder)
         {
+
             // Connecting the service layer
             builder.Services.AddServiceLayer();
 

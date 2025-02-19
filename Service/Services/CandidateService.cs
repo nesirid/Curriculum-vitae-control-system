@@ -64,7 +64,7 @@ namespace Service.Services
                 .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
 
             if (candidate == null)
-                throw new KeyNotFoundException("Namizəd tapılmadı");
+            throw new KeyNotFoundException("Namizəd tapılmadı");
 
             if (!string.IsNullOrWhiteSpace(dto.FullName)) candidate.FullName = dto.FullName;
             if (!string.IsNullOrWhiteSpace(dto.Description)) candidate.Description = dto.Description;
@@ -106,18 +106,26 @@ namespace Service.Services
             };
         }
 
-
-        public async Task<List<CandidateDto>> GetAllCandidatesAsync()
+        public async Task<List<CandidateDto>> GetAllCandidatesAsync(int pageNumber, int pageSize)
         {
+            pageNumber = Math.Max(pageNumber, 1);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
             var candidates = await _dbContext.Candidates
+                .AsNoTrackingWithIdentityResolution()
                 .Include(c => c.PhoneNumbers)
+                .Include(c => c.Photos)
                 .Where(c => !c.IsDeleted)
+                .OrderBy(c => c.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             return candidates.Select(c => new CandidateDto
             {
                 Id = c.Id,
                 FullName = c.FullName,
+                Description = c.Description,
                 Birthday = c.Birthday,
                 BirthPlace = c.BirthPlace,
                 Gender = c.Gender.ToString(),
@@ -127,14 +135,17 @@ namespace Service.Services
                 Skills = c.Skills,
                 Languages = c.Languages,
                 Certificates = c.Certificates,
-                PhoneNumbers = c.PhoneNumbers.Select(p => p.Number).ToList()
+                PhoneNumbers = c.PhoneNumbers.Select(p => p.Number).ToList(),
+                MainPhotoUrl = c.Photos.FirstOrDefault(p => p.IsMain)?.Url
             }).ToList();
         }
 
         public async Task<CandidateDto> GetCandidateByIdAsync(int id)
         {
             var candidate = await _dbContext.Candidates
+                .AsNoTrackingWithIdentityResolution()
                 .Include(c => c.PhoneNumbers)
+                .Include(c => c.Photos)
                 .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
 
             if (candidate == null) throw new KeyNotFoundException("Namizəd Tapılmadı");
@@ -153,17 +164,42 @@ namespace Service.Services
                 Skills = candidate.Skills,
                 Languages = candidate.Languages,
                 Certificates = candidate.Certificates,
-                PhoneNumbers = candidate.PhoneNumbers.Select(p => p.Number).ToList()
+                PhoneNumbers = candidate.PhoneNumbers.Select(p => p.Number).ToList(),
+                MainPhotoUrl = candidate.Photos.FirstOrDefault(p => p.IsMain)?.Url
             };
         }
 
         public async Task<bool> DeleteCandidateAsync(int id)
         {
             var candidate = await _dbContext.Candidates
+                .Include(c => c.Photos)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (candidate == null) return false;
+            if (candidate.Photos != null && candidate.Photos.Any())
+            {
+                foreach (var photo in candidate.Photos)
+                {
+                    string filePath = Path.Combine(Directory.GetCurrentDirectory(), photo.Url.TrimStart('/'));
 
+                    try
+                    {
+                        if (File.Exists(filePath))
+                        {
+                            File.Delete(filePath);
+                            Console.WriteLine($"Foto silindi: {filePath}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Fayl tapılmadı: {filePath}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error fayl silinmədi {filePath}: {ex.Message}");
+                    }
+                }
+            }
             _dbContext.Candidates.Remove(candidate);
             await _dbContext.SaveChangesAsync();
             return true;
@@ -171,6 +207,38 @@ namespace Service.Services
 
         public async Task<bool> DeleteAllCandidatesAsync()
         {
+            var candidates = await _dbContext.Candidates
+                .Include(c => c.Photos)
+                .ToListAsync();
+
+            if (!candidates.Any()) return false;
+            foreach (var candidate in candidates)
+            {
+                if (candidate.Photos != null && candidate.Photos.Any())
+                {
+                    foreach (var photo in candidate.Photos)
+                    {
+                        string filePath = Path.Combine(Directory.GetCurrentDirectory(), photo.Url.TrimStart('/'));
+
+                        try
+                        {
+                            if (File.Exists(filePath))
+                            {
+                                File.Delete(filePath);
+                                Console.WriteLine($"Foto silindi: {filePath}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Fayl tapılmadı: {filePath}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error fayl silinmədi {filePath}: {ex.Message}");
+                        }
+                    }
+                }
+            }
             int affectedRows = await _dbContext.Candidates.ExecuteDeleteAsync();
             return affectedRows > 0;
         }

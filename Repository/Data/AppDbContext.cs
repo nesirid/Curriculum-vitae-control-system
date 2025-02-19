@@ -13,6 +13,7 @@ namespace Repository.Data
         public DbSet<CandidateCompany> CandidateCompanies { get; set; }
         public DbSet<Position> Positions { get; set; }
         public DbSet<Experience> Experiences { get; set; }
+        public DbSet<CandidatePhoto> CandidatePhotos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,6 +53,12 @@ namespace Repository.Data
             .HasOne(p => p.CandidateCompany)
             .WithMany(cc => cc.Positions)
             .HasForeignKey(p => p.CandidateCompanyId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CandidatePhoto>()
+            .HasOne(p => p.Candidate)
+            .WithMany(c => c.Photos)
+            .HasForeignKey(p => p.CandidateId)
             .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -12,7 +12,7 @@ namespace Service.Services.Interfaces
     {
         Task<CandidateDto> CreateCandidateAsync(CandidateCreateDto dto);
         Task<CandidateDto> UpdateCandidateAsync(int id, CandidateEditDto dto);
-        Task<List<CandidateDto>> GetAllCandidatesAsync();
+        Task<List<CandidateDto>> GetAllCandidatesAsync(int pageNumber, int pageSize);
         Task<CandidateDto> GetCandidateByIdAsync(int id);
         Task<bool> DeleteCandidateAsync(int id);
         Task<bool> DeleteAllCandidatesAsync();

@@ -5,6 +5,8 @@ using App.Middlewares;
 using Microsoft.OpenApi.Models;
 using Service;
 using App.Configurations;
+using Service.Services.Interfaces;
+using Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,10 @@ AppConfiguration.ConfigureLogging(builder);
 
 // Registration of services
 AppConfiguration.ConfigureServices(builder);
+
+var configuration = builder.Configuration;
+
+builder.Services.AddSingleton<IConfiguration>(configuration);
 
 var app = builder.Build();
 

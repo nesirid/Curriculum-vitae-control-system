@@ -1,5 +1,4 @@
 ﻿using Domain.Enums;
-using System.Text.Json.Serialization;
 
 namespace Service.DTOs.Candidates
 {
@@ -15,6 +14,7 @@ namespace Service.DTOs.Candidates
 
         public string MaritalStatus { get; set; }
         public string Education { get; set; }
+
         public List<string> Skills { get; set; } = new();
         public List<string> Languages { get; set; } = new();
         public List<string> Certificates { get; set; } = new();

@@ -20,9 +20,4 @@
 
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Parsers\Interfaces\" />
-    <Folder Include="Services\Interfaces\" />
-  </ItemGroup>
-
 </Project>

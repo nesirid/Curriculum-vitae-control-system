@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Service.Services;
 using Service.Services.Interfaces;
 
@@ -16,6 +17,9 @@ namespace Service
 
             // Basic services
             services.AddScoped<ICandidateService, CandidateService>();
+            services.AddScoped<ICandidatePhotoService, CandidatePhotoService>();
+
+
 
             // Registration of validators (if any)
             //services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
