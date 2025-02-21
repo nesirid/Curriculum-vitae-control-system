@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Service.Services.Interfaces
 {
-    public interface IFileTypeRecognizer
+    public interface IDocFileTypeRecognizer
     {
         string RecognizeFileType(byte[] fileContent, string fileName);
     }

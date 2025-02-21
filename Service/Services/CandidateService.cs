@@ -1,6 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Repository.Data;
 using Service.DTOs.Candidates;
 using Service.Services.Interfaces;
@@ -10,10 +11,17 @@ namespace Service.Services
     public class CandidateService : ICandidateService
     {
         private readonly AppDbContext _dbContext;
+        private readonly string _uploadsFolder;
 
-        public CandidateService(AppDbContext dbContext)
+        public CandidateService(AppDbContext dbContext, IConfiguration configuration)
         {
             _dbContext = dbContext;
+            _uploadsFolder = configuration["FileStorage:UploadPath"] ?? "wwwroot/uploads";
+
+            if (!Directory.Exists(_uploadsFolder))
+            {
+                Directory.CreateDirectory(_uploadsFolder);
+            }
         }
 
         public async Task<CandidateDto> CreateCandidateAsync(CandidateCreateDto dto)
@@ -64,7 +72,7 @@ namespace Service.Services
                 .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
 
             if (candidate == null)
-            throw new KeyNotFoundException("Namizəd tapılmadı");
+                throw new KeyNotFoundException("Namizəd tapılmadı");
 
             if (!string.IsNullOrWhiteSpace(dto.FullName)) candidate.FullName = dto.FullName;
             if (!string.IsNullOrWhiteSpace(dto.Description)) candidate.Description = dto.Description;
@@ -137,7 +145,7 @@ namespace Service.Services
                 Certificates = c.Certificates,
                 PhoneNumbers = c.PhoneNumbers.Select(p => p.Number).ToList(),
                 MainPhotoUrl = c.Photos.FirstOrDefault(p => p.IsMain)?.Url
-            }).ToList();
+                                     }).ToList();
         }
 
         public async Task<CandidateDto> GetCandidateByIdAsync(int id)
@@ -176,11 +184,13 @@ namespace Service.Services
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (candidate == null) return false;
+
             if (candidate.Photos != null && candidate.Photos.Any())
             {
-                foreach (var photo in candidate.Photos)
+                foreach (var photo in candidate.Photos.ToList())
                 {
-                    string filePath = Path.Combine(Directory.GetCurrentDirectory(), photo.Url.TrimStart('/'));
+                    string relativePath = photo.Url.StartsWith("uploads/") ? photo.Url.Substring(8) : photo.Url;
+                    string filePath = Path.Combine(_uploadsFolder, relativePath.Replace("/", "\\"));
 
                     try
                     {
@@ -196,12 +206,15 @@ namespace Service.Services
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error fayl silinmədi {filePath}: {ex.Message}");
+                        Console.WriteLine($"Fayl silinmədi {filePath}: {ex.Message}");
                     }
+
+                    _dbContext.CandidatePhotos.Remove(photo);
                 }
             }
             _dbContext.Candidates.Remove(candidate);
             await _dbContext.SaveChangesAsync();
+
             return true;
         }
 
@@ -212,13 +225,15 @@ namespace Service.Services
                 .ToListAsync();
 
             if (!candidates.Any()) return false;
+
             foreach (var candidate in candidates)
             {
                 if (candidate.Photos != null && candidate.Photos.Any())
                 {
-                    foreach (var photo in candidate.Photos)
+                    foreach (var photo in candidate.Photos.ToList())
                     {
-                        string filePath = Path.Combine(Directory.GetCurrentDirectory(), photo.Url.TrimStart('/'));
+                        string relativePath = photo.Url.StartsWith("uploads/") ? photo.Url.Substring(8) : photo.Url;
+                        string filePath = Path.Combine(_uploadsFolder, relativePath.Replace("/", "\\"));
 
                         try
                         {
@@ -234,7 +249,7 @@ namespace Service.Services
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Error fayl silinmədi {filePath}: {ex.Message}");
+                            Console.WriteLine($"Fayl silinmədi {filePath}: {ex.Message}");
                         }
                     }
                 }
@@ -242,6 +257,7 @@ namespace Service.Services
             int affectedRows = await _dbContext.Candidates.ExecuteDeleteAsync();
             return affectedRows > 0;
         }
+
 
         public async Task<bool> SoftDeleteCandidateAsync(int id)
         {

@@ -6,6 +6,9 @@ using Repository.Data;
 using Serilog;
 using Service;
 using System.Text.Json.Serialization;
+using Swashbuckle.AspNetCore.Filters;
+using App.Configurations.Swagger;
+
 
 namespace App.Configurations
 {
@@ -44,6 +47,7 @@ namespace App.Configurations
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "File Format Control", Version = "v1" });
                 c.UseInlineDefinitionsForEnums();
+                c.OperationFilter<FileUploadOperationFilter>();
             });
         }
 

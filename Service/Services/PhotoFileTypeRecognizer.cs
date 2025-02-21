@@ -7,19 +7,15 @@ using System.Threading.Tasks;
 
 namespace Service.Services
 {
-    public class FileTypeRecognizer : IFileTypeRecognizer
+    public class PhotoFileTypeRecognizer : IPhotoFileTypeRecognizer
     {
+        private static readonly string[]
+        PhotoExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+
         public string RecognizeFileType(byte[] fileContent, string fileName)
         {
             var extension = Path.GetExtension(fileName)?.ToLower().Trim();
-
-            return extension switch
-            {
-                ".doc" => "doc",
-                ".docx" => "docx",
-                ".pdf" => "pdf",
-                _ => "unknown"
-            };
+            return PhotoExtensions.Contains(extension) ? "photo" : "unknown";
         }
     }
 }

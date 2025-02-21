@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Service.Parsers.Interfaces
 {
-    public interface ICurriculumVitaeFileParserWord
+    public interface IFileParser
     {
-
+        Task<string> ExtractTextAsync(byte[] fileContent);
     }
 }
